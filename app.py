@@ -17,6 +17,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import make_pipeline
 import joblib
+from flask_migrate import Migrate
 
 load_dotenv()
 app = Flask(__name__)
@@ -27,6 +28,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 csrf = CSRFProtect(app)
 db.init_app(app)
+migrate = Migrate(app, db)
 login_manager = LoginManager()
 login_manager.login_view = 'login'
 login_manager.init_app(app)
