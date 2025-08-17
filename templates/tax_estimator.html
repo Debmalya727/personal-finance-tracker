@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Tax Estimator (India)</a>
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav">
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a></li>
+      </ul>
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+    {% if not salary_setup %}
+    <div class="alert alert-info">
+        <strong>Pro-Tip:</strong> Your tax is currently estimated at zero. For an accurate projection, please <a href="{{ url_for('salary_manager') }}" class="alert-link">set up your salary details</a> first.
+    </div>
+    {% else %}
+    <div class="text-center mb-4">
+        <h2>Tax Regime Comparison</h2>
+        <p class="lead">Based on your projected annual income of <strong>₹ {{ '%.2f'|format(new_regime.gross_income) }}</strong></p>
+    </div>
+
+    <div class="row">
+        <!-- New Regime Card -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 {% if new_regime.total_tax < old_regime.total_tax %}border-success border-3{% endif %}">
+                <div class="card-header bg-primary text-white"><h4 class="mb-0">New Tax Regime</h4></div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between"><span>Gross Salary + Other Income</span> <span>₹ {{ '%.2f'|format(new_regime.gross_income) }}</span></li>
+                        <li class="list-group-item d-flex justify-content-between"><span>Less: Standard Deduction</span> <span class="text-danger">(- ₹ {{ '%.2f'|format(new_regime.standard_deduction) }})</span></li>
+                        <li class="list-group-item list-group-item-info d-flex justify-content-between"><strong>Taxable Regular Income</strong> <strong>₹ {{ '%.2f'|format(new_regime.taxable_income) }}</strong></li>
+                        <li class="list-group-item d-flex justify-content-between"><span>Tax on Regular Income</span> <span>₹ {{ '%.2f'|format(new_regime.income_tax + new_regime.cess) }}</span></li>
+                        <li class="list-group-item d-flex justify-content-between"><span>Tax on Capital Gains</span> <span>+ ₹ {{ '%.2f'|format(capital_gains.total_tax) }}</span></li>
+                    </ul>
+                </div>
+                <div class="card-footer text-center {% if new_regime.total_tax < old_regime.total_tax %}bg-success text-white{% else %}bg-light{% endif %}">
+                    <h5 class="mb-0">Total Tax: ₹ {{ '%.2f'|format(new_regime.total_tax) }}</h5>
+                </div>
+            </div>
+        </div>
+
+        <!-- Old Regime Card -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 {% if old_regime.total_tax < new_regime.total_tax %}border-success border-3{% endif %}">
+                <div class="card-header bg-secondary text-white"><h4 class="mb-0">Old Tax Regime</h4></div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between"><span>Gross Salary + Other Income</span> <span>₹ {{ '%.2f'|format(old_regime.gross_income) }}</span></li>
+                        <li class="list-group-item d-flex justify-content-between"><span>Less: Deductions (80C, HRA)</span> <span class="text-danger">(- ₹ {{ '%.2f'|format(old_regime.total_deductions) }})</span></li>
+                        <li class="list-group-item d-flex justify-content-between"><span>Less: Standard Deduction</span> <span class="text-danger">(- ₹ {{ '%.2f'|format(old_regime.standard_deduction) }})</span></li>
+                        <li class="list-group-item list-group-item-info d-flex justify-content-between"><strong>Taxable Regular Income</strong> <strong>₹ {{ '%.2f'|format(old_regime.taxable_income) }}</strong></li>
+                        <li class="list-group-item d-flex justify-content-between"><span>Tax on Regular Income</span> <span>₹ {{ '%.2f'|format(old_regime.income_tax + old_regime.cess) }}</span></li>
+                        <li class="list-group-item d-flex justify-content-between"><span>Tax on Capital Gains</span> <span>+ ₹ {{ '%.2f'|format(capital_gains.total_tax) }}</span></li>
+                    </ul>
+                </div>
+                <div class="card-footer text-center {% if old_regime.total_tax < new_regime.total_tax %}bg-success text-white{% else %}bg-light{% endif %}">
+                    <h5 class="mb-0">Total Tax: ₹ {{ '%.2f'|format(old_regime.total_tax) }}</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Capital Gains Breakdown -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h4>Capital Gains Tax Breakdown</h4>
+        </div>
+        <div class="card-body">
+            <p>This is the tax payable on profits from selling your investments during this financial year.</p>
+            <ul class="list-group">
+                <li class="list-group-item"><strong>Short-Term Stocks (STCG @ 15%):</strong> Gain of ₹{{ '%.2f'|format(capital_gains.stcg_stocks) }} → Tax of ₹{{ '%.2f'|format(capital_gains.stcg_tax) }}</li>
+                <li class="list-group-item"><strong>Long-Term Stocks (LTCG @ 10% > 1L):</strong> Gain of ₹{{ '%.2f'|format(capital_gains.ltcg_stocks) }} → Tax of ₹{{ '%.2f'|format(capital_gains.ltcg_tax) }}</li>
+                <li class="list-group-item"><strong>Crypto (Gains @ 30%):</strong> Gain of ₹{{ '%.2f'|format(capital_gains.crypto_gains) }} → Tax of ₹{{ '%.2f'|format(capital_gains.crypto_tax) }}</li>
+                <li class="list-group-item list-group-item-primary"><strong>Total Capital Gains Tax: ₹{{ '%.2f'|format(capital_gains.total_tax) }}</strong></li>
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

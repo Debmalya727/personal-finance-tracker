@@ -1,0 +1,16 @@
+# Environment variables
+.env
+
+# Python virtual environment
+venv/
+.venv/
+
+# Python cache files
+__pycache__/
+*.pyc
+
+# Saved Machine Learning Models
+*.pkl
+
+# VS Code settings
+.vscode/

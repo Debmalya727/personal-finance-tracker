@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Edit Loan</a>
+  </div>
+</nav>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header"><h4>Edit Loan</h4></div>
+                <div class="card-body">
+                    <form method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Loan Name</label>
+                                <input type="text" name="loan_name" class="form-control" value="{{ loan.loan_name }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Total Principal Amount (₹)</label>
+                                <input type="number" step="1000" name="principal" class="form-control" value="{{ loan.principal }}" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Annual Interest Rate (%)</label>
+                                <input type="number" step="0.01" name="interest_rate" class="form-control" value="{{ loan.interest_rate }}" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Tenure (in Months)</label>
+                                <input type="number" name="tenure_months" class="form-control" value="{{ loan.tenure_months }}" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Start Date</label>
+                                <input type="date" name="start_date" class="form-control" value="{{ loan.start_date.strftime('%Y-%m-%d') }}" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Changes & Recalculate EMI</button>
+                        <a href="{{ url_for('loans') }}" class="btn btn-secondary">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

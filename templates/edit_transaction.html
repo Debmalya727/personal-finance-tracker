@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Edit Transaction</a>
+  </div>
+</nav>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header"><h4>Edit Transaction</h4></div>
+                <div class="card-body">
+                    <form method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <div class="mb-3">
+                            <label class="form-label">Date</label>
+                            <input type="date" name="date" class="form-control" value="{{ transaction.date.strftime('%Y-%m-%d') }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <input type="text" name="description" class="form-control" value="{{ transaction.description }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Amount</label>
+                            <input type="number" step="0.01" name="amount" class="form-control" value="{{ transaction.amount }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Type</label>
+                            <select name="type" class="form-select">
+                                <option value="income" {% if transaction.type == 'income' %}selected{% endif %}>Income</option>
+                                <option value="expense" {% if transaction.type == 'expense' %}selected{% endif %}>Expense</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Category</label>
+                            <select name="category" class="form-select">
+                                <option value="Uncategorized" {% if transaction.category == 'Uncategorized' %}selected{% endif %}>Uncategorized</option>
+                                <option value="Food" {% if transaction.category == 'Food' %}selected{% endif %}>Food</option>
+                                <option value="Transport" {% if transaction.category == 'Transport' %}selected{% endif %}>Transport</option>
+                                <option value="Utilities" {% if transaction.category == 'Utilities' %}selected{% endif %}>Utilities</option>
+                                <option value="Rent" {% if transaction.category == 'Rent' %}selected{% endif %}>Rent</option>
+                                <option value="Salary" {% if transaction.category == 'Salary' %}selected{% endif %}>Salary</option>
+                                <option value="EMI" {% if transaction.category == 'EMI' %}selected{% endif %}>EMI</option>
+                                <option value="Entertainment" {% if transaction.category == 'Entertainment' %}selected{% endif %}>Entertainment</option>
+                                <option value="Other" {% if transaction.category == 'Other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <a href="{{ url_for('view_transactions') }}" class="btn btn-secondary">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

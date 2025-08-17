@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Edit Scheme</a>
+  </div>
+</nav>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header"><h4>Edit Scheme</h4></div>
+                <div class="card-body">
+                    <form method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Scheme Name</label>
+                                <input type="text" name="scheme_name" class="form-control" value="{{ scheme.scheme_name }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Principal Amount (₹)</label>
+                                <input type="number" step="100" name="principal_amount" class="form-control" value="{{ scheme.principal_amount }}" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Interest Rate (% p.a.)</label>
+                                <input type="number" step="0.01" name="interest_rate" class="form-control" value="{{ scheme.interest_rate }}" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Tenure (in Months)</label>
+                                <input type="number" name="tenure_months" class="form-control" value="{{ scheme.tenure_months }}" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Start Date</label>
+                                <input type="date" name="start_date" class="form-control" value="{{ scheme.start_date.strftime('%Y-%m-%d') }}" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Penalty Rate (%)</label>
+                                <input type="number" step="0.1" name="penalty_rate" class="form-control" value="{{ scheme.penalty_rate }}" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <a href="{{ url_for('schemes') }}" class="btn btn-secondary">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Net Worth Dashboard</a>
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav">
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}">Main Dashboard</a></li>
+      </ul>
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 text-center">
+            <h2 class="mb-3">Your Total Net Worth</h2>
+            <!-- Card color changes to red if net worth is negative -->
+            <div class="card {% if net_worth < 0 %}bg-danger{% else %}bg-primary{% endif %} text-white shadow">
+                <div class="card-body">
+                    <h1 class="display-4 fw-bold">₹ {{ '%.2f'|format(net_worth) }}</h1>
+                    <p class="lead mb-0">(Total Assets of ₹{{ '%.2f'|format(assets) }} - Total Liabilities of ₹{{ '%.2f'|format(liabilities) }})</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-5">
+
+    <div class="row">
+        <!-- Asset Breakdown -->
+        <div class="col-md-6 mb-4">
+            <h3 class="mb-3">Asset Allocation</h3>
+            <div class="card">
+                <div class="card-body">
+                    <canvas id="netWorthChart"></canvas>
+                </div>
+            </div>
+             <ul class="list-group mt-3">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Cash Balance
+                    <span class="badge bg-success rounded-pill fs-6">₹ {{ '%.2f'|format(cash) }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Fixed Schemes
+                    <span class="badge bg-info rounded-pill fs-6">₹ {{ '%.2f'|format(schemes) }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Investments
+                    <span class="badge bg-warning text-dark rounded-pill fs-6">₹ {{ '%.2f'|format(investments) }}</span>
+                </li>
+                 <li class="list-group-item list-group-item-light d-flex justify-content-between align-items-center">
+                    <strong>Total Assets</strong>
+                    <strong class="fs-6">₹ {{ '%.2f'|format(assets) }}</strong>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Liabilities Breakdown -->
+        <div class="col-md-6 mb-4">
+            <h3 class="mb-3">Liabilities</h3>
+             <ul class="list-group">
+                <!-- Loop through each loan for a detailed breakdown -->
+                {% for loan in loans %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ loan.loan_name }}
+                    <span class="badge bg-danger rounded-pill fs-6">₹ {{ '%.2f'|format(loan.outstanding) }}</span>
+                </li>
+                {% endfor %}
+                 <li class="list-group-item list-group-item-light d-flex justify-content-between align-items-center">
+                    <strong>Total Liabilities</strong>
+                    <strong class="fs-6">₹ {{ '%.2f'|format(liabilities) }}</strong>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const chartData = {{ chart_data|safe }};
+        const ctx = document.getElementById('netWorthChart').getContext('2d');
+        
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: chartData.labels,
+                datasets: [{
+                    label: 'Asset Allocation',
+                    data: chartData.data,
+                    backgroundColor: [
+                        'rgba(25, 135, 84, 0.7)',
+                        'rgba(13, 202, 240, 0.7)',
+                        'rgba(255, 193, 7, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(25, 135, 84, 1)',
+                        'rgba(13, 202, 240, 1)',
+                        'rgba(255, 193, 7, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    // --- New Tooltip Configuration ---
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed !== null) {
+                                    const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.parsed / total) * 100).toFixed(2);
+                                    label += `₹${context.parsed.toFixed(2)} (${percentage}%)`;
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Investment Portfolio</a>
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav">
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a></li>
+      </ul>
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}{% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }} <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}{% endif %}
+    {% endwith %}
+
+    <!-- Form to Add New Investment -->
+    <div class="card mb-5">
+        <div class="card-header"><h4>Add New Investment</h4></div>
+        <div class="card-body">
+            <form action="{{ url_for('add_investment') }}" method="POST">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Asset Type</label>
+                        <select id="asset-type-select" name="asset_type" class="form-select" required>
+                            <option value="Stock">Stock</option>
+                            <option value="Crypto">Crypto</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Purchase Date</label>
+                        <input type="date" name="purchase_date" class="form-control" required>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Ticker / Symbol</label>
+                        <input type="text" name="ticker_symbol" class="form-control" required>
+                        <div class="form-text">Stock: e.g., <strong>RELIANCE.NS</strong> | Crypto ID: e.g., <strong>bitcoin</strong></div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Quantity</label>
+                        <input type="number" step="0.000001" name="quantity" class="form-control" required>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Purchase Price</label>
+                        <input type="number" step="0.01" name="purchase_price" class="form-control" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Currency</label>
+                        <select id="currency-select" name="purchase_currency" class="form-select" required>
+                            <option value="INR">INR (₹)</option>
+                            <option value="USD">USD ($)</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Add to Portfolio</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <ul class="nav nav-tabs" id="investmentTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="portfolio-tab" data-bs-toggle="tab" data-bs-target="#portfolio" type="button" role="tab" aria-controls="portfolio" aria-selected="true">Active Portfolio</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab" aria-controls="history" aria-selected="false">Sales History</button>
+      </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="investmentTabsContent">
+      <!-- Active Portfolio Tab -->
+      <div class="tab-pane fade show active" id="portfolio" role="tabpanel" aria-labelledby="portfolio-tab">
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <h4>Your Active Holdings</h4>
+            <div>
+                <span id="refresh-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span id="last-updated">Updating...</span>
+            </div>
+        </div>
+        <hr>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Asset</th>
+                        <th class="text-end">Quantity</th>
+                        <th class="text-end">Purchase Price</th>
+                        <th class="text-end">Current Price</th>
+                        <th class="text-end">Total Value</th>
+                        <th class="text-end">Profit / Loss</th>
+                        <th class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="portfolio-body">
+                    <tr><td colspan="7" class="text-center">Loading portfolio...</td></tr>
+                </tbody>
+            </table>
+        </div>
+      </div>
+      <!-- Sales History Tab -->
+      <div class="tab-pane fade" id="history" role="tabpanel" aria-labelledby="history-tab">
+        <h4 class="mt-3">Your Sales History</h4>
+        <hr>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Asset</th>
+                        <th>Sell Date</th>
+                        <th class="text-end">Quantity</th>
+                        <th class="text-end">Purchase Price</th>
+                        <th class="text-end">Sell Price</th>
+                        <th class="text-end">Capital Gain / Loss</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if sales %}
+                        {% for sale in sales %}
+                        <tr>
+                            <td>
+                                <strong>{{ sale.ticker_symbol.upper() }}</strong>
+                                <span class="badge bg-secondary">{{ sale.asset_type }}</span>
+                            </td>
+                            <td>{{ sale.sell_date.strftime('%d %b, %Y') }}</td>
+                            <td class="text-end">{{ sale.quantity }}</td>
+                            <td class="text-end">₹ {{ '%.2f'|format(sale.purchase_price) }}</td>
+                            <td class="text-end">₹ {{ '%.2f'|format(sale.sell_price) }}</td>
+                            {% if sale.capital_gain >= 0 %}
+                                <td class="text-end text-success fw-bold">+ ₹ {{ '%.2f'|format(sale.capital_gain) }}</td>
+                            {% else %}
+                                <td class="text-end text-danger fw-bold">- ₹ {{ '%.2f'|format(sale.capital_gain|abs) }}</td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr><td colspan="6" class="text-center">You have not sold any investments yet.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+      </div>
+    </div>
+</div>
+
+<!-- Sell Investment Modal -->
+<div class="modal fade" id="sellModal" tabindex="-1" aria-labelledby="sellModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="sellModalLabel">Sell Investment</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="sell-form" method="POST">
+          <div class="modal-body">
+            <p>You are selling: <strong id="sell-asset-name"></strong></p>
+            <div class="mb-3">
+                <label class="form-label">Sell Quantity</label>
+                <input type="number" step="0.000001" name="sell_quantity" id="sell-quantity" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Sell Price (per unit)</label>
+                <input type="number" step="0.01" name="sell_price" id="sell-price" class="form-control" required>
+            </div>
+             <div class="mb-3">
+                <label class="form-label">Sell Date</label>
+                <input type="date" name="sell_date" class="form-control" required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-danger">Confirm Sale</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const portfolioBody = document.getElementById('portfolio-body');
+        const lastUpdatedSpan = document.getElementById('last-updated');
+        const refreshSpinner = document.getElementById('refresh-spinner');
+        const assetTypeSelect = document.getElementById('asset-type-select');
+        const currencySelect = document.getElementById('currency-select');
+
+        assetTypeSelect.addEventListener('change', function() {
+            if (this.value === 'Crypto') {
+                currencySelect.value = 'USD';
+                currencySelect.disabled = false;
+            } else {
+                currencySelect.value = 'INR';
+                currencySelect.disabled = true;
+            }
+        });
+        if (assetTypeSelect.value === 'Stock') {
+            currencySelect.disabled = true;
+        }
+
+        async function fetchAndRenderPortfolio() {
+            lastUpdatedSpan.textContent = 'Updating...';
+            refreshSpinner.classList.remove('d-none');
+
+            try {
+                const response = await fetch('/refresh_prices');
+                if (!response.ok) throw new Error('Network response was not ok');
+                
+                const result = await response.json();
+                portfolioBody.innerHTML = '';
+
+                if (result.data.length === 0) {
+                    portfolioBody.innerHTML = '<tr><td colspan="7" class="text-center">Your portfolio is empty.</td></tr>';
+                } else {
+                    result.data.forEach(item => {
+                        const row = document.createElement('tr');
+                        const p_currency_symbol = item.investment.purchase_currency === 'INR' ? '₹' : '$';
+                        const c_currency_symbol = item.investment.asset_type === 'Stock' ? '₹' : '$';
+                        
+                        const profitLossClass = item.profit_loss_display >= 0 ? 'text-success' : 'text-danger';
+                        const profitLossSign = item.profit_loss_display >= 0 ? '+' : '-';
+
+                        const display_currency_symbol = item.investment.asset_type === 'Stock' ? '₹' : '$';
+                        const total_value_display = item.investment.asset_type === 'Stock' ? item.total_value_inr : item.total_value_inr / result.exchange_rate;
+
+                        row.innerHTML = `
+                            <td>
+                                <strong>${item.investment.ticker_symbol}</strong>
+                                <span class="badge bg-secondary">${item.investment.asset_type}</span>
+                            </td>
+                            <td class="text-end">${item.investment.quantity}</td>
+                            <td class="text-end">${p_currency_symbol} ${item.investment.purchase_price.toFixed(2)}</td>
+                            <td class="text-end">${c_currency_symbol} ${item.current_price_display.toFixed(2)}</td>
+                            <td class="text-end fw-bold">${display_currency_symbol} ${total_value_display.toFixed(2)}</td>
+                            <td class="text-end fw-bold ${profitLossClass}">
+                                ${profitLossSign} ${display_currency_symbol} ${Math.abs(item.profit_loss_display).toFixed(2)}
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-danger sell-btn" 
+                                    data-id="${item.investment.id}" 
+                                    data-name="${item.investment.ticker_symbol}" 
+                                    data-quantity="${item.investment.quantity}"
+                                    data-price="${item.current_price_display.toFixed(2)}">Sell</button>
+                                <form action="/delete_investment/${item.investment.id}" method="POST" onsubmit="return confirm('Remove this from your portfolio?');" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary">Del</button>
+                                </form>
+                            </td>
+                        `;
+                        portfolioBody.appendChild(row);
+                    });
+                }
+                
+                const now = new Date();
+                lastUpdatedSpan.textContent = `Last updated: ${now.toLocaleTimeString()}`;
+
+            } catch (error) {
+                console.error('Failed to refresh prices:', error);
+                portfolioBody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Failed to load data.</td></tr>';
+                lastUpdatedSpan.textContent = 'Update failed';
+            } finally {
+                refreshSpinner.classList.add('d-none');
+            }
+        }
+
+        const sellModal = new bootstrap.Modal(document.getElementById('sellModal'));
+        const sellForm = document.getElementById('sell-form');
+        const sellAssetName = document.getElementById('sell-asset-name');
+        const sellQuantityInput = document.getElementById('sell-quantity');
+        const sellPriceInput = document.getElementById('sell-price');
+
+        portfolioBody.addEventListener('click', function(event) {
+            if (event.target.classList.contains('sell-btn')) {
+                const button = event.target;
+                const investmentId = button.dataset.id;
+                const assetName = button.dataset.name;
+                const maxQuantity = button.dataset.quantity;
+                const currentPrice = button.dataset.price;
+
+                sellAssetName.textContent = assetName;
+                sellQuantityInput.value = maxQuantity;
+                sellQuantityInput.max = maxQuantity;
+                sellPriceInput.value = currentPrice;
+                sellForm.action = `/sell_investment/${investmentId}`;
+
+                sellModal.show();
+            }
+        });
+
+        fetchAndRenderPortfolio();
+        setInterval(fetchAndRenderPortfolio, 60000);
+    });
+</script>
+{% endblock %}

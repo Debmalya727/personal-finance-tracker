@@ -1,0 +1,14 @@
+cryptography
+python-dateutil
+Flask
+Flask-SQLAlchemy
+Flask-Login
+Werkzeug
+PyMySQL
+python-dotenv
+yfinance
+pycoingecko
+Flask-WTF
+scikit-learn
+pandas
+numpy
