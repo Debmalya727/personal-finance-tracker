@@ -12,3 +12,5 @@ Flask-WTF
 scikit-learn
 pandas
 numpy
+gunicorn
+psycopg2-binary
