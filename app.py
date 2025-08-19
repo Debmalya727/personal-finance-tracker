@@ -17,18 +17,28 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import make_pipeline
 import joblib
-from flask_migrate import Migrate
 
+# --- Load environment ---
 load_dotenv()
 app = Flask(__name__)
 
+# Secret key
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URI')
+
+# Database URI (Clever Cloud)
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
+    'DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# Init extensions
 csrf = CSRFProtect(app)
 db.init_app(app)
-migrate = Migrate(app, db)
+
+# --- Ensure tables always created (even under Gunicorn/Render) ---
+with app.app_context():
+    db.create_all()
+
+# Login manager
 login_manager = LoginManager()
 login_manager.login_view = 'login'
 login_manager.init_app(app)

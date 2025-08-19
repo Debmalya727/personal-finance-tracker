@@ -30,6 +30,8 @@
         <div class="card-header"><h4>Add New Investment</h4></div>
         <div class="card-body">
             <form action="{{ url_for('add_investment') }}" method="POST">
+                <!-- Add CSRF token -->
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div class="row">
                     <div class="col-md-3 mb-3">
                         <label class="form-label">Asset Type</label>
@@ -165,6 +167,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <form id="sell-form" method="POST">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
           <div class="modal-body">
             <p>You are selling: <strong id="sell-asset-name"></strong></p>
             <div class="mb-3">
@@ -255,6 +258,7 @@
                                     data-quantity="${item.investment.quantity}"
                                     data-price="${item.current_price_display.toFixed(2)}">Sell</button>
                                 <form action="/delete_investment/${item.investment.id}" method="POST" onsubmit="return confirm('Remove this from your portfolio?');" style="display:inline;">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                     <button type="submit" class="btn btn-sm btn-outline-secondary">Del</button>
                                 </form>
                             </td>
