@@ -26,7 +26,14 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 # Database URI (Clever Cloud)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URI')
+db_uri = os.getenv("MYSQL_ADDON_URI")
+
+# ensure pymysql is used instead of MySQLdb
+if db_uri and db_uri.startswith("mysql://"):
+    db_uri = db_uri.replace("mysql://", "mysql+pymysql://", 1)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Init extensions
