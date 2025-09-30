@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block navbar %}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container-fluid"><a class="navbar-brand" href="#">Business Dashboard</a><button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('business_dashboard') }}">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('business_transactions') }}">Transactions</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="{{ url_for('business_financials') }}"><b>Financials</b></a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('business_investments') }}">Investments</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('business_clients') }}">Clients</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('business_loans') }}">Loans</a></li>
+                </ul>
+                <ul class="navbar-nav"><li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li></ul>
+            </div>
+        </div>
+    </nav>
+{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="alert alert-info">
+        This page shows the financial summary for the <strong>current month</strong>, calculated automatically from your business transactions. 
+        <a href="{{ url_for('business_transactions') }}" class="alert-link">Add a transaction</a> to update these numbers.
+    </div>
+    <div class="card p-3 shadow-sm">
+        <h5 class="card-title">This Month's Financial Overview</h5>
+        {% if metrics %}
+            <p class="mb-1"><strong>Total Revenue:</strong> ₹{{ '%.2f'|format(metrics.monthly_revenue) }}</p>
+            <p class="mb-1"><strong>Total Expenses:</strong> ₹{{ '%.2f'|format(metrics.monthly_expenses) }}</p>
+            <p class="mb-1"><strong>Net Profit:</strong> ₹{{ '%.2f'|format(metrics.net_profit) }}</p>
+            <p class="mb-0"><strong>Profit Margin:</strong> {{ '%.2f'|format(metrics.profit_margin) }}%</p>
+        {% else %}
+            <p class="text-muted">No financial data recorded for this month.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Monthly Budget Planner{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Monthly Budget Planner</h1>
+    </div>
+    <p class="text-muted">Set a monthly spending limit for your expense categories. Leave the amount blank or 0 to not set a budget.</p>
+
+    <form method="POST" class="mt-4">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <div class="card">
+            <div class="card-body">
+
+                <div class="row d-none d-md-flex fw-bold border-bottom pb-2 mb-3">
+                    <div class="col-md-3">Category</div>
+                    <div class="col-md-4">Progress</div>
+                    <div class="col-md-3">Spent / Budgeted</div>
+                    <div class="col-md-2">Monthly Limit</div>
+                </div>
+
+                {% if budgets_data %}
+                    {% for budget in budgets_data %}
+                    <div class="row align-items-center mb-4">
+                        <div class="col-md-3">
+                            <label for="budget_{{ budget.category_id }}" class="form-label fw-bold mb-0">{{ budget.category_name }}</label>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="progress" style="height: 25px;">
+                                <div class="progress-bar {% if budget.percentage > 90 %}bg-danger{% elif budget.percentage > 70 %}bg-warning{% else %}bg-success{% endif %}"
+                                     role="progressbar"
+                                     style="width: {{ budget.percentage }}%;"
+                                     aria-valuenow="{{ budget.percentage }}"
+                                     aria-valuemin="0"
+                                     aria-valuemax="100">
+                                     {{ budget.percentage }}%
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-muted">
+                           ₹{{ "%.2f"|format(budget.spent_amount) }} of ₹{{ "%.2f"|format(budget.budget_amount) }}
+                        </div>
+                        <div class="col-md-2">
+                            <div class="input-group">
+                                <span class="input-group-text">₹</span>
+                                <input type="number" step="0.01" min="0" class="form-control" name="budget_{{ budget.category_id }}" id="budget_{{ budget.category_id }}" value="{{ '%.2f'|format(budget.budget_amount) if budget.budget_amount > 0 else '' }}" placeholder="0.00">
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center p-4">
+                        <p class="lead text-muted">You have no expense categories to budget for.</p>
+                        <p>To get started, please go to the <a href="{{ url_for('manage_categories') }}">Categories</a> page...</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if budgets_data %}
+        <div class="text-end mt-3">
+            <button type="submit" class="btn btn-primary">Save Budgets</button>
+        </div>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}

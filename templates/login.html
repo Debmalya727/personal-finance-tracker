@@ -9,26 +9,49 @@
           {% endfor %}{% endif %}
         {% endwith %}
 
+        <!-- Login Card -->
         <div class="card p-4">
             <h3 class="card-title">Login</h3>
             <form method="POST" action="{{ url_for('login') }}">
-                <!-- Add CSRF token -->
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <div class="mb-3"><label class="form-label">Username</label><input type="text" class="form-control" name="username" required></div>
-                <div class="mb-3"><label class="form-label">Password</label><input type="password" class="form-control" name="password" required></div>
-                <button type="submit" name="login" class="btn btn-primary">Login</button>
+                <div class="mb-3">
+                    <label class="form-label">Username</label>
+                    <input type="text" class="form-control" name="username" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-control" name="password" required>
+                </div>
+                <button type="submit" name="login" class="btn btn-primary w-100">Login</button>
             </form>
         </div>
 
+        <!-- Registration Card -->
         <div class="card p-4 mt-4">
             <h3 class="card-title">Register</h3>
             <form method="POST" action="{{ url_for('login') }}">
-                <!-- Add CSRF token -->
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <div class="mb-3"><label class="form-label">Username</label><input type="text" class="form-control" name="username" required></div>
-                <div class="mb-3"><label class="form-label">Date of Birth</label><input type="date" class="form-control" name="dob" required></div>
-                <div class="mb-3"><label class="form-label">Password</label><input type="password" class="form-control" name="password" required></div>
-                <button type="submit" name="register" class="btn btn-secondary">Register</button>
+                <div class="mb-3">
+                    <label class="form-label">Username</label>
+                    <input type="text" class="form-control" name="username" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Date of Birth</label>
+                    <input type="date" class="form-control" name="dob" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-control" name="password" required>
+                </div>
+                <!-- Role Selection -->
+                <div class="mb-3">
+                    <label class="form-label">Role</label>
+                    <select name="role" class="form-select" required>
+                        <option value="employee">Office Employee</option>
+                        <option value="business">Business User</option>
+                    </select>
+                </div>
+                <button type="submit" name="register" class="btn btn-secondary w-100">Register</button>
             </form>
         </div>
     </div>

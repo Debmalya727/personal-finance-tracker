@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h3 class="mb-3">Edit Business Loan</h3>
+    <div class="card p-3 shadow-sm">
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <div class="row">
+                <div class="col-md-6 mb-3"><label>Loan Name</label><input type="text" name="loan_name" class="form-control" value="{{ loan.loan_name }}" required></div>
+                <div class="col-md-6 mb-3"><label>Total Principal (₹)</label><input type="number" step="1000" name="principal_amount" class="form-control" value="{{ loan.principal_amount }}" required></div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3"><label>Annual Interest Rate (%)</label><input type="number" step="0.01" name="interest_rate" class="form-control" value="{{ loan.interest_rate }}" required></div>
+                <div class="col-md-4 mb-3"><label>Tenure (in Months)</label><input type="number" name="tenure_months" class="form-control" value="{{ loan.tenure_months }}" required></div>
+                <div class="col-md-4 mb-3"><label>Start Date</label><input type="date" name="start_date" class="form-control" value="{{ loan.start_date.strftime('%Y-%m-%d') }}" required></div>
+            </div>
+            <button type="submit" class="btn btn-primary">Save Changes & Recalculate EMI</button>
+            <a href="{{ url_for('business_loans') }}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

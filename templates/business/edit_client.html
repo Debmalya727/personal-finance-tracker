@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block navbar %}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Edit Client</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('business_clients') }}">Back to Clients</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="card p-3 shadow-sm">
+        <h5>Edit Client</h5>
+        <form method="POST">
+             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <div class="row">
+                <div class="col-md-6 mb-3"><label>Client Name</label><input type="text" name="client_name" class="form-control" value="{{ client.client_name }}" required></div>
+                <div class="col-md-6 mb-3"><label>Project / Service</label><input type="text" name="project" class="form-control" value="{{ client.project }}" required></div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3"><label>Revenue Contribution (₹)</label><input type="number" step="100" name="revenue_contribution" class="form-control" value="{{ client.revenue_contribution }}" required></div>
+                <div class="col-md-6 mb-3"><label>Status</label><select name="status" class="form-select">
+                    <option value="Active" {% if client.status == 'Active' %}selected{% endif %}>Active</option>
+                    <option value="Inactive" {% if client.status == 'Inactive' %}selected{% endif %}>Inactive</option>
+                </select></div>
+            </div>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <a href="{{ url_for('business_clients') }}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

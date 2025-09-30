@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block navbar %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+    <div class="container-fluid"><a class="navbar-brand" href="#">Business Dashboard</a><button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link active" href="{{ url_for('business_dashboard') }}"><strong>Dashboard</strong></a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('business_transactions') }}">Transactions</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('business_financials') }}">Financials</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('business_investments') }}">Investments</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('business_clients') }}">Clients</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('business_insights') }}">AI Insights</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('business_loans') }}">Loans</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('manage_categories') }}">Categories</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('business_reports') }}">Reports</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('budget') }}">Budget</a></li>
+            </ul>
+            <ul class="navbar-nav"><li class="nav-item"><a class="nav-link" href="{{ url_for('profile') }}">Profile</a></li><li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li></ul>
+        </div>
+    </div>
+</nav>
+{% endblock %}
+{% block content %}
+<h2 class="mb-3">Welcome, {{ user.username }}! (Business)</h2>
+<div class="row">
+    <div class="col-md-4"><div class="card text-white bg-success mb-3"><div class="card-header">Monthly Revenue</div><div class="card-body"><h5 class="card-title">₹{{ '%.2f'|format(monthly_revenue) }}</h5></div></div></div>
+    <div class="col-md-4"><div class="card text-white bg-danger mb-3"><div class="card-header">Monthly Expenses</div><div class="card-body"><h5 class="card-title">₹{{ '%.2f'|format(monthly_expenses) }}</h5></div></div></div>
+    <div class="col-md-4"><div class="card text-white bg-info mb-3"><div class="card-header">Net Profit</div><div class="card-body"><h5 class="card-title">₹{{ '%.2f'|format(net_profit) }}</h5></div></div></div>
+</div>
+
+<div class="row">
+    <div class="col-md-4"><div class="card mb-3"><div class="card-header">Active Clients</div><div class="card-body"><h5 class="card-title">{{ summary.active_clients }}</h5></div></div></div>
+    <div class="col-md-4"><div class="card mb-3"><div class="card-header">Total Investment Value</div><div class="card-body"><h5 class="card-title">₹{{ '%.2f'|format(summary.total_investment_value) }}</h5></div></div></div>
+    <div class="col-md-4"><div class="card mb-3"><div class="card-header">Total Outstanding Loans</div><div class="card-body"><h5 class="card-title">₹{{ '%.2f'|format(summary.total_outstanding_loans) }}</h5></div></div></div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-lg-8 mb-4">
+        <div class="card h-100">
+            <div class="card-header"><h4>AI Cash Flow Forecast (Next 60 Days)</h4></div>
+            <div class="card-body">
+                <canvas id="cashFlowForecastChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header"><h4>This Month's Cashflow</h4></div>
+            <div class="card-body">
+                <canvas id="businessChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // --- This Month's Cashflow Chart ---
+        try {
+            const chartData = {{ chart_data|tojson }};
+            new Chart(document.getElementById('businessChart').getContext('2d'), {
+                type: 'bar',
+                data: { labels: chartData.labels, datasets: [{ label: 'Amount (₹)', data: chartData.values, backgroundColor: ['rgba(25, 135, 84, 0.7)', 'rgba(220, 53, 69, 0.7)'], borderColor: ['rgba(25, 135, 84, 1)', 'rgba(220, 53, 69, 1)'], borderWidth: 1 }] },
+                options: { responsive: true, maintainAspectRatio: true }
+            });
+        } catch (e) { console.error("Error rendering business chart:", e); }
+
+        // --- NEW: AI Cash Flow Forecast Logic ---
+        const forecastCtx = document.getElementById('cashFlowForecastChart').getContext('2d');
+        async function fetchAndRenderForecast() {
+            try {
+                const response = await fetch('/predict_business_cashflow');
+                if (!response.ok) throw new Error('Network error.');
+                const data = await response.json();
+
+                if (data.error) {
+                    console.warn("Forecast warning:", data.error);
+                    // You can display the error message to the user if you want
+                    forecastCtx.canvas.parentNode.innerHTML = `<p class="text-muted text-center mt-5">${data.error}</p>`;
+                    return;
+                }
+
+                new Chart(forecastCtx, {
+                    type: 'line',
+                    data: {
+                        labels: data.dates,
+                        datasets: [
+                            {
+                                label: 'Predicted Net Flow (₹)',
+                                data: data.predicted_flow,
+                                borderColor: 'rgba(13, 110, 253, 1)',
+                                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                                fill: false,
+                                tension: 0.1
+                            },
+                            {
+                                label: 'Confidence Interval',
+                                data: data.upper_bound,
+                                fill: '-1', // Fill to the dataset at index - 1 (the one above)
+                                backgroundColor: 'rgba(13, 110, 253, 0.2)',
+                                borderColor: 'transparent',
+                                pointRadius: 0
+                            },
+                            {
+                                label: 'Lower Bound (Hidden)',
+                                data: data.lower_bound,
+                                borderColor: 'transparent',
+                                pointRadius: 0,
+                                fill: false
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { y: { beginAtZero: false } }
+                    }
+                });
+
+            } catch(e) {
+                console.error("Error fetching or rendering forecast:", e);
+                forecastCtx.canvas.parentNode.innerHTML = `<p class="text-muted text-center mt-5">Could not load forecast data.</p>`;
+            }
+        }
+        fetchAndRenderForecast();
+    });
+</script>
+{% endblock %}

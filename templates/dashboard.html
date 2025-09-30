@@ -1,7 +1,58 @@
 {% extends "base.html" %}
 
+{% block navbar %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Finance Tracker</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" href="{{ url_for('dashboard') }}"><strong>Dashboard</strong></a>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('net_worth') }}">Net Worth</a></li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        Track
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="{{ url_for('view_transactions') }}">Transactions</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('investments') }}">Investments</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('schemes') }}">Fixed Schemes</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('loans') }}">Loans & EMIs</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('budget') }}">Budget</a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('tax_estimator') }}">Tax Estimator</a></li>
+                
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('manage_categories') }}">Categories</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('reports') }}">Reports</a></li>
+            </ul>
+
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('salary_manager') }}">Salary Manager</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('profile') }}">Profile</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+{% endblock %}
+
 {% block content %}
 <style>
+    /* High z-index for dropdown to ensure it appears above other content like charts */
+    .dropdown-menu {
+        z-index: 2000;
+    }
+
     /* Styles for the floating action button */
     .fab {
         position: fixed;
@@ -12,9 +63,9 @@
         color: white;
         border-radius: 28px; /* Pill shape */
         text-align: center;
-        font-size: 16px; /* Adjusted font size */
+        font-size: 16px;
         font-weight: 500;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         z-index: 1000;
         border: none;
         transition: background-color 0.3s;
@@ -24,183 +75,314 @@
         justify-content: center;
         gap: 8px;
     }
+
     .fab:hover {
         background-color: #0b5ed7;
     }
+
     .fab-icon {
         font-size: 24px;
         line-height: 1;
     }
 </style>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#">Finance Tracker</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <!-- Simplified Navigation Bar -->
-      <ul class="navbar-nav me-auto">
-        <li class="nav-item"><a class="nav-link active" href="{{ url_for('dashboard') }}"><strong>Dashboard</strong></a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('net_worth') }}">Net Worth</a></li>
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Track
-          </a>
-          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <li><a class="dropdown-item" href="{{ url_for('view_transactions') }}">Transactions</a></li>
-            <li><a class="dropdown-item" href="{{ url_for('investments') }}">Investments</a></li>
-            <li><a class="dropdown-item" href="{{ url_for('schemes') }}">Fixed Schemes</a></li>
-            <li><a class="dropdown-item" href="{{ url_for('loans') }}">Loans & EMIs</a></li>
-          </ul>
-        </li>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('tax_estimator') }}">Tax Estimator</a></li>
-      </ul>
-      <ul class="navbar-nav">
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('salary_manager') }}">Salary Manager</a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('profile') }}">Profile</a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
-      </ul>
-    </div>
-  </div>
-</nav>
-
-<div class="container">
-    <h2 class="mb-3">Welcome, {{ user.username }}!</h2>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}{% for category, message in messages %}
+<h2 class="mb-3">Welcome, {{ user.username }}!</h2>
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
         <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-          {{ message }} <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            {{ message }} <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-      {% endfor %}{% endif %}
-    {% endwith %}
-    
-    <div class="row">
-        <div class="col-md-4"><div class="card text-white bg-success mb-3"><div class="card-header">This Month's Income</div><div class="card-body"><h5 class="card-title">₹{{ '%.2f'|format(monthly_income) }}</h5></div></div></div>
-        <div class="col-md-4"><div class="card text-white bg-danger mb-3"><div class="card-header">This Month's Expense</div><div class="card-body"><h5 class="card-title">₹{{ '%.2f'|format(monthly_expense) }}</h5></div></div></div>
-        <div class="col-md-4"><div class="card text-white bg-info mb-3"><div class="card-header">Total Cash Balance</div><div class="card-body"><h5 class="card-title">₹{{ '%.2f'|format(balance) }}</h5></div></div></div>
-    </div>
-    
-    <div class="row mt-4">
-        <div class="col-md-6 mb-4">
-            <div class="card h-100">
-                <div class="card-header"><h4>Recent Transactions</h4></div>
-                <div class="card-body">
-                    <ul class="list-group list-group-flush">
-                        {% if recent_transactions %}
-                            {% for transaction in recent_transactions %}
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <strong>{{ transaction.description }}</strong>
-                                    <small class="d-block text-muted">{{ transaction.date.strftime('%d %b, %Y') }}</small>
-                                </div>
-                                {% if transaction.type == 'income' %}
-                                    <span class="badge bg-success rounded-pill">+ ₹{{ '%.2f'|format(transaction.amount) }}</span>
-                                {% else %}
-                                    <span class="badge bg-danger rounded-pill">- ₹{{ '%.2f'|format(transaction.amount) }}</span>
-                                {% endif %}
-                            </li>
-                            {% endfor %}
-                        {% else %}
-                            <li class="list-group-item text-center">No transactions yet. Click the '+' button to add one!</li>
-                        {% endif %}
-                    </ul>
-                </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-header">This Month's Income</div>
+            <div class="card-body">
+                <h5 class="card-title">₹{{ '%.2f'|format(monthly_income) }}</h5>
             </div>
         </div>
-        <div class="col-md-6 mb-4">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h3 class="card-title">This Month's Cashflow</h3>
-                    <canvas id="financeChart"></canvas>
-                </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-danger mb-3">
+            <div class="card-header">This Month's Expense</div>
+            <div class="card-body">
+                <h5 class="card-title">₹{{ '%.2f'|format(monthly_expense) }}</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-header">Total Cash Balance</div>
+            <div class="card-body">
+                <h5 class="card-title">₹{{ '%.2f'|format(balance) }}</h5>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Floating Action Button -->
+<div class="row mt-4">
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h4>Recent Transactions</h4>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% if recent_transactions %}
+                        {% for transaction in recent_transactions %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ transaction.description }}</strong>
+                                <small class="d-block text-muted">{{ transaction.date.strftime('%d %b, %Y') }}</small>
+                            </div>
+                            {% if transaction.type == 'income' %}
+                            <span class="badge bg-success rounded-pill">+ ₹{{ '%.2f'|format(transaction.amount) }}</span>
+                            {% else %}
+                            <span class="badge bg-danger rounded-pill">- ₹{{ '%.2f'|format(transaction.amount) }}</span>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    {% else %}
+                    <li class="list-group-item text-center">No transactions yet. Click the '+' button to add one!</li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h3 class="card-title">This Month's Cashflow</h3>
+                <canvas id="financeChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4>Future Balance Prediction (30 Days)</h4>
+            </div>
+            <div class="card-body">
+                <canvas id="balancePredictionChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4>AI Insights</h4>
+            </div>
+            <div class="card-body">
+                <ul id="ai-insights-list" class="list-group"></ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <button class="fab" data-bs-toggle="modal" data-bs-target="#addTransactionModal">
     <span class="fab-icon">+</span>
     <span>Add Transaction</span>
 </button>
 
-<!-- Add Transaction Modal -->
-<div class="modal fade" id="addTransactionModal" tabindex="-1" aria-labelledby="addTransactionModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="addTransactionModalLabel">Add New Transaction</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <form action="{{ url_for('add_transaction') }}" method="POST">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-          <div class="modal-body">
-            <div class="mb-3"><label class="form-label">Description</label><input type="text" name="description" class="form-control" required></div>
-            <div class="mb-3"><label class="form-label">Amount</label><input type="number" step="0.01" name="amount" class="form-control" required></div>
-            <div class="mb-3"><label class="form-label">Type</label><select name="type" class="form-select"><option value="income">Income</option><option value="expense">Expense</option></select></div>
-            <div class="mb-3">
-                <label class="form-label">Category</label>
-                <select name="category" class="form-select">
-                    <option value="Uncategorized">Uncategorized</option><option value="Food">Food</option><option value="Transport">Transport</option><option value="Utilities">Utilities</option><option value="Rent">Rent</option><option value="Salary">Salary</option><option value="EMI">EMI</option><option value="Entertainment">Entertainment</option><option value="Other">Other</option>
-                </select>
+<div class="modal fade" id="addTransactionModal" tabindex="-1" aria-labelledby="addTransactionModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addTransactionModalLabel">Add New Transaction</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-primary">Add Transaction</button>
-          </div>
-      </form>
-    </div>
-  </div>
-</div>
+            <form action="{{ url_for('add_transaction') }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <input type="text" name="description" id="transaction-description" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Amount</label>
+                        <input type="number" step="0.01" name="amount" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Type</label>
+                        <select name="type" class="form-select">
+                            <option value="income">Income</option>
+                            <option value="expense" selected>Expense</option>
+                        </select>
+                    </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+                    <div class="mb-3">
+                        <label class="form-label">Category</label>
+                        <div class="input-group">
+                            <select name="category_id" id="transaction-category" class="form-select" required>
+                                <option value="">-- Select a Category --</option>
+                                {% for cat in current_user.categories|sort(attribute='name') %}
+                                <option value="{{ cat.id }}">{{ cat.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-text"><a href="{{ url_for('manage_categories') }}">Manage Categories</a></div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Add Transaction</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 <script>
-    // Register the datalabels plugin
+    // It's important to register plugins globally
     Chart.register(ChartDataLabels);
 
-    const chartData = {{ chart_data|safe }};
-    const ctx = document.getElementById('financeChart').getContext('2d');
-    new Chart(ctx, { 
-        type: 'doughnut', 
-        data: { 
-            labels: chartData.labels, 
-            datasets: [{ 
-                label: 'Finance Summary', 
-                data: chartData.data, 
-                backgroundColor: ['rgba(25, 135, 84, 0.7)','rgba(220, 53, 69, 0.7)'], 
-                borderColor: ['rgba(25, 135, 84, 1)','rgba(220, 53, 69, 1)'], 
-                borderWidth: 1 
-            }] 
-        }, 
-        options: { 
-            responsive: true, 
-            maintainAspectRatio: true,
-            plugins: {
-                legend: {
-                    position: 'bottom',
+    document.addEventListener('DOMContentLoaded', function () {
+        // --- Monthly Cashflow Chart ---
+        try {
+            const chartData = {{ chart_data|tojson }}; // Use tojson for safety
+            const ctx = document.getElementById('financeChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: chartData.labels,
+                    datasets: [{
+                        label: 'Finance Summary',
+                        data: chartData.data,
+                        backgroundColor: ['rgba(25, 135, 84, 0.7)', 'rgba(220, 53, 69, 0.7)'],
+                        borderColor: ['rgba(25, 135, 84, 1)', 'rgba(220, 53, 69, 1)'],
+                        borderWidth: 1
+                    }]
                 },
-                datalabels: {
-                    formatter: (value, ctx) => {
-                        let sum = 0;
-                        let dataArr = ctx.chart.data.datasets[0].data;
-                        dataArr.map(data => {
-                            sum += data;
-                        });
-                        if (sum === 0) {
-                            return '0%';
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    animation: { duration: 1000 },
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        datalabels: {
+                            formatter: (value, ctx) => {
+                                let sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                if (sum === 0) return '0%';
+                                return (value * 100 / sum).toFixed(2) + "%";
+                            },
+                            color: '#fff',
                         }
-                        let percentage = (value*100 / sum).toFixed(2)+"%";
-                        return percentage;
-                    },
-                    color: '#fff',
+                    }
                 }
+            });
+        } catch (e) {
+            console.error("Error rendering finance chart:", e);
+        }
+
+        // --- Smart Category Prediction (Updated for category_id) ---
+        const descriptionInput = document.getElementById('transaction-description');
+        const categorySelect = document.getElementById('transaction-category');
+        let debounceTimeout;
+
+        descriptionInput.addEventListener('keyup', function () {
+            clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(async function () {
+                const description = descriptionInput.value;
+                if (description.length > 3) {
+                    try {
+                        const response = await fetch('/predict_category', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({ description: description })
+                        });
+                        if (!response.ok) throw new Error('Network response was not ok.');
+                        const result = await response.json();
+                        // Check for category_id and set the dropdown value
+                        if (result.category_id) {
+                           categorySelect.value = result.category_id;
+                        }
+                    } catch (e) {
+                        console.error("Error fetching category prediction:", e);
+                    }
+                }
+            }, 500);
+        });
+
+        // --- Balance Prediction Chart ---
+        const predictionCtx = document.getElementById('balancePredictionChart').getContext('2d');
+        async function fetchAndRenderPrediction() {
+            try {
+                const response = await fetch('/predict_balance');
+                if (!response.ok) throw new Error('Network response was not ok.');
+                const result = await response.json();
+                if (result.prediction && result.prediction.length > 0) {
+                    new Chart(predictionCtx, {
+                        type: 'line',
+                        data: {
+                            labels: Array.from({ length: 30 }, (_, i) => `Day ${i + 1}`),
+                            datasets: [{
+                                label: 'Predicted Balance (₹)',
+                                data: result.prediction,
+                                borderColor: 'rgba(13, 110, 253, 1)',
+                                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                                fill: true,
+                                tension: 0.1
+                            }]
+                        },
+                        options: { scales: { y: { beginAtZero: false } } }
+                    });
+                }
+            } catch (e) {
+                console.error("Error fetching balance prediction:", e);
             }
-        } 
+        }
+        fetchAndRenderPrediction();
+
+        // --- AI Insights ---
+        async function loadAIInsights() {
+            try {
+                const response = await fetch('/ai_insights');
+                if (!response.ok) throw new Error('Network response was not ok.');
+                const data = await response.json();
+                const list = document.getElementById('ai-insights-list');
+                list.innerHTML = ''; // Clear previous insights
+                if (data.insights && data.insights.length > 0) {
+                    data.insights.forEach(insight => {
+                        let li = document.createElement('li');
+                        li.className = 'list-group-item';
+                        li.textContent = insight;
+                        list.appendChild(li);
+                    });
+                } else {
+                    let li = document.createElement('li');
+                    li.className = 'list-group-item text-muted';
+                    li.textContent = 'No insights available at the moment.';
+                    list.appendChild(li);
+                }
+            } catch (e) {
+                console.error("Error fetching AI insights:", e);
+            }
+        }
+        loadAIInsights();
+
+        // --- Train the model in the background ---
+        // This is a "fire and forget" request, we don't need to wait for it.
+        fetch('/train_model').catch(e => console.error("Error triggering model training:", e));
     });
 </script>
 {% endblock %}

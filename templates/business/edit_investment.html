@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h3 class="mb-3">Edit Business Investment</h3>
+    <div class="card p-3 shadow-sm">
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <div class="row">
+                <div class="col-md-6 mb-3"><label>Investment Name</label><input type="text" name="investment_name" class="form-control" value="{{ investment.investment_name }}" required></div>
+                <div class="col-md-6 mb-3"><label>Type</label>
+                    <select name="investment_type" class="form-select">
+                        <option value="Equipment" {% if investment.investment_type == 'Equipment' %}selected{% endif %}>Equipment</option>
+                        <option value="Vehicle" {% if investment.investment_type == 'Vehicle' %}selected{% endif %}>Vehicle</option>
+                        <option value="Property" {% if investment.investment_type == 'Property' %}selected{% endif %}>Property</option>
+                        <option value="Financial" {% if investment.investment_type == 'Financial' %}selected{% endif %}>Financial</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3"><label>Amount Invested (₹)</label><input type="number" step="100" name="amount_invested" class="form-control" value="{{ investment.amount_invested }}" required></div>
+                <div class="col-md-4 mb-3"><label>Purchase Date</label><input type="date" name="purchase_date" class="form-control" value="{{ investment.purchase_date.strftime('%Y-%m-%d') }}" required></div>
+                <div class="col-md-4 mb-3"><label>Useful Life (in Years)</label><input type="number" name="useful_life_years" class="form-control" value="{{ investment.useful_life_years or '' }}" placeholder="For physical assets only"></div>
+            </div>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <a href="{{ url_for('business_investments') }}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

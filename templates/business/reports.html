@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block navbar %}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container-fluid"><a class="navbar-brand" href="#">Business Dashboard</a><button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('business_dashboard') }}">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('business_transactions') }}">Transactions</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="{{ url_for('business_reports') }}"><b>Reports</b></a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('business_financials') }}">Financials</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('business_investments') }}">Investments</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('business_clients') }}">Clients</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('business_loans') }}">Loans</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('manage_categories') }}">Categories</a></li>
+                </ul>
+                <ul class="navbar-nav"><li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li></ul>
+            </div>
+        </div>
+    </nav>
+{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h3 class="mb-3 text-center">Generate Business Report</h3>
+            {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}{% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">{{ message }} <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+            {% endfor %}{% endif %}{% endwith %}
+            <div class="card p-4">
+                <form method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Start Date</label>
+                            <input type="date" name="start_date" class="form-control" value="{{ today }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">End Date</label>
+                            <input type="date" name="end_date" class="form-control" value="{{ today }}" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Download Format</label>
+                        <select name="format" class="form-select">
+                            <option value="pdf">PDF</option>
+                            <option value="csv">CSV</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Generate and Download Report</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
