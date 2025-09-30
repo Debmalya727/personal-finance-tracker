@@ -43,20 +43,20 @@ The application is built on a classic three-tier architecture, designed for scal
 
 ## ✨ Features in Detail
 
-### ### 🤖 AI-Powered Receipt Scanner
+### 🤖 AI-Powered Receipt Scanner
 This feature revolutionizes transaction entry.
 * **Workflow:** A user uploads a receipt image via the web interface. A client-side JavaScript function sends this image to a dedicated Flask endpoint.
 * **Technology:** The backend uploads the image to **Cloudinary** for persistent storage, receiving a secure URL in return. This image data is then passed to an AI model (e.g., Google Gemini or Donut) which extracts key information like the vendor, total amount, and date.
 * **User Experience:** The extracted data, along with the Cloudinary URL, is sent back to the browser as a JSON response. The JavaScript then automatically populates the fields of the "Add Transaction" form, allowing the user to simply verify the data and click save.
 
-### ### 📈 ML-Powered Anomaly Detection
+### 📈 ML-Powered Anomaly Detection
 To provide proactive financial security, the system includes a custom anomaly detection model.
 * **Model:** A `IsolationForest` model from the Scikit-learn library is trained on a per-user basis using their historical transaction data.
 * **Implementation:** After a new business transaction is saved, it is passed to a `check_transaction_anomaly` function. The function uses the pre-trained model to predict whether the new transaction is an "inlier" (normal) or an "outlier" (unusual).
 * **User Feedback:** If an outlier is detected, a prominent `flash` message is displayed on the dashboard, warning the user of the unusually high transaction and prompting them to review it.
 * **Auto-Retraining:** The model is automatically retrained with fresh data in the background after every 20 new transactions, ensuring it stays up-to-date with the user's evolving spending patterns.
 
-### ### 💰 Smart Budgeting System
+### 💰 Smart Budgeting System
 This module empowers users to take control of their spending.
 * **Functionality:** Users can navigate to a dedicated Budget Planner page where all their 'expense' type categories are listed. They can set a monthly spending limit for any or all of these categories.
 * **Visualization:** The system provides real-time feedback with color-coded progress bars (green -> yellow -> red) that show how much of the budget has been consumed. A summary card on the main dashboard gives an at-a-glance overview of the overall budget status.
