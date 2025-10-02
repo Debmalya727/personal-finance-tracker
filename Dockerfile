@@ -4,6 +4,11 @@ FROM python:3.11-slim
 # Set the working directory in the container
 WORKDIR /app
 
+# --- ADD THIS BLOCK ---
+# Install system-level dependencies required by OpenCV (cv2)
+RUN apt-get update && apt-get install -y libgl1-mesa-glx
+# --- END OF BLOCK ---
+
 # Copy the requirements file into the container
 COPY requirements.txt .
 
@@ -17,4 +22,4 @@ COPY . .
 EXPOSE 7860
 
 # The command to run your app using Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:7860", "--worker-tmp-dir", "/dev/shm", "app:app"]
+CMD ["gunicorn", "--bind", "0.-", "--worker-tmp-dir", "/dev/shm", "app:app"]
