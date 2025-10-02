@@ -429,48 +429,53 @@ def check_transaction_anomaly(new_transaction, user_id):
     
     return prediction[0] == -1
 # --- Routes ---
+# -------------------
+# Login Route
+# -------------------
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        # Redirect based on role if already logged in
         if current_user.role.strip().lower() == 'business':
             return redirect(url_for('business_dashboard'))
         return redirect(url_for('dashboard'))
 
     if request.method == 'POST':
-        if 'register' in request.form:
-            username = request.form.get('username')
-            password = request.form.get('password')
-            dob_str = request.form.get('dob')
-            role = request.form.get('role')  # New field in register.html
-            
-            # Prevent duplicate usernames
-            if User.query.filter_by(username=username).first():
-                flash('Username already exists.', 'error')
-                return redirect(url_for('login'))
+        username = request.form.get('username')
+        password = request.form.get('password')
+        user = User.query.filter_by(username=username).first()
 
-            dob = datetime.strptime(dob_str, '%Y-%m-%d').date()
-            hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
-            new_user = User(username=username, password=hashed_password, dob=dob, role=role)
-            db.session.add(new_user)
-            db.session.commit()
-            flash('Registration successful! Please log in.', 'success')
-            return redirect(url_for('login'))
-
-        elif 'login' in request.form:
-            username = request.form.get('username')
-            password = request.form.get('password')
-            user = User.query.filter_by(username=username).first()
-
-            if user and check_password_hash(user.password, password):
-                login_user(user)
-                if user.role.strip().lower() == 'business':
-                    return redirect(url_for('business_dashboard'))
-                return redirect(url_for('dashboard'))
-            else:
-                flash('Invalid username or password.', 'error')
+        if user and check_password_hash(user.password, password):
+            login_user(user)
+            if user.role.strip().lower() == 'business':
+                return redirect(url_for('business_dashboard'))
+            return redirect(url_for('dashboard'))
+        else:
+            flash('Invalid username or password.', 'error')
 
     return render_template('login.html')
+
+# -------------------
+# Register Route
+# -------------------
+@app.route('/register', methods=['POST'])
+def register():
+    username = request.form.get('username')
+    password = request.form.get('password')
+    dob_str = request.form.get('dob')
+    role = request.form.get('role')
+
+    # Prevent duplicate usernames
+    if User.query.filter_by(username=username).first():
+        flash('Username already exists.', 'error')
+        return redirect(url_for('login'))
+
+    dob = datetime.strptime(dob_str, '%Y-%m-%d').date()
+    hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+    new_user = User(username=username, password=hashed_password, dob=dob, role=role)
+    db.session.add(new_user)
+    db.session.commit()
+    flash('Registration successful! Please log in.', 'success')
+    return redirect(url_for('login'))
 
 @app.route('/logout')
 @login_required

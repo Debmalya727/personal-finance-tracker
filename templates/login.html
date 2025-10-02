@@ -4,9 +4,11 @@
     <div class="col-md-6">
         <h1 class="text-center">Personal Finance Tracker</h1>
         {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}{% for category, message in messages %}
-            <div class="alert alert-{{ category }}">{{ message }}</div>
-          {% endfor %}{% endif %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
         {% endwith %}
 
         <!-- Login Card -->
@@ -29,7 +31,7 @@
         <!-- Registration Card -->
         <div class="card p-4 mt-4">
             <h3 class="card-title">Register</h3>
-            <form method="POST" action="{{ url_for('login') }}">
+            <form method="POST" action="{{ url_for('register') }}">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div class="mb-3">
                     <label class="form-label">Username</label>
