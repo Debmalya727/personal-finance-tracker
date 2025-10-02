@@ -63,7 +63,7 @@ import google.generativeai as genai
 load_dotenv()
 app = Flask(__name__)
 
-app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY", "devsecret")
+app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY")
 app.config['WTF_CSRF_ENABLED'] = True
 app.config['SESSION_COOKIE_SECURE'] = False   # (Spaces runs on http in dev)
 app.config['SESSION_COOKIE_SAMESITE'] = "Lax"
