@@ -5,13 +5,6 @@ colorFrom: green
 colorTo: blue
 sdk: docker
 app_port: 7860
-------
-title: AI-Powered Finance Tracker
-emoji: 🤖
-colorFrom: green
-colorTo: blue
-sdk: docker
-app_port: 7860
 ---
 
 # 🤖 Fin-AI: An Intelligent Personal & Business Finance Manager
