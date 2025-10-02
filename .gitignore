@@ -15,3 +15,5 @@ __pycache__/
 # VS Code settings
 .vscode/
 .txt
+# .gitignore
+tempCodeRunnerFile.py

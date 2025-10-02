@@ -63,10 +63,15 @@ import google.generativeai as genai
 load_dotenv()
 app = Flask(__name__)
 
-app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY")
-app.config['WTF_CSRF_ENABLED'] = True
-app.config['SESSION_COOKIE_SECURE'] = False   # (Spaces runs on http in dev)
-app.config['SESSION_COOKIE_SAMESITE'] = "Lax"
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'a-super-secret-key-that-is-long-and-random')
+
+app.config.update(
+    WTF_CSRF_ENABLED=False,
+    SESSION_COOKIE_SECURE=False,   # Spaces runs behind proxy, HTTP is fine
+    SESSION_COOKIE_SAMESITE="Lax", # allows cookies for cross-site form posts
+    SESSION_COOKIE_HTTPONLY=True
+)
+
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
