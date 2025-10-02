@@ -5,7 +5,7 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Install system-level dependencies required by OpenCV (cv2)
-RUN apt-get update && apt-get install -y libgl1
+RUN apt-get update && apt-get install -y libgl1 libgthread-2.0-0
 
 # Copy the requirements file into the container
 COPY requirements.txt .
